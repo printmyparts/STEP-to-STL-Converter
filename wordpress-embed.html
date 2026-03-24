@@ -1,0 +1,63 @@
+<!-- 
+  STEP to STL Converter - WordPress Embed Code
+  
+  INSTRUCTIONS:
+  1. First deploy the converter to Vercel (see README.md)
+  2. Replace YOUR-VERCEL-URL below with your actual Vercel URL
+  3. Copy this entire code block
+  4. In WordPress, add an HTML block or Custom HTML widget
+  5. Paste this code
+  6. Publish!
+  
+  The iframe will be responsive and work on all devices.
+-->
+
+<style>
+  .converter-iframe-wrapper {
+    width: 100%;
+    max-width: 700px;
+    margin: 40px auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    background: white;
+  }
+  
+  .converter-iframe-wrapper iframe {
+    width: 100%;
+    height: 900px;
+    border: none;
+    display: block;
+  }
+  
+  @media (max-width: 768px) {
+    .converter-iframe-wrapper {
+      margin: 20px auto;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    
+    .converter-iframe-wrapper iframe {
+      height: 800px;
+    }
+  }
+</style>
+
+<div class="converter-iframe-wrapper">
+  <iframe 
+    src="https://YOUR-VERCEL-URL.vercel.app"
+    title="STEP to STL Converter"
+    loading="lazy"
+    allow="accelerometer; camera; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+  </iframe>
+</div>
+
+<!-- 
+  NOTES:
+  - Replace YOUR-VERCEL-URL with your actual Vercel project URL
+  - The iframe height is set to 900px but you can adjust this
+  - If using Elementor, you can paste this in an HTML widget
+  - If using Gutenberg, use the Custom HTML block
+  - The wrapper adds nice styling with shadows and rounded corners
+-->
