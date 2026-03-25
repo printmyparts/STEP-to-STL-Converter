@@ -3,17 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free online STEP to STL converter. Convert CAD files directly in your browser with no upload required.">
-    <title>STEP to STL Converter - Free Online CAD File Converter</title>
+    <meta name="description" content="Free online STEP to STL converter. Convert CAD files directly in your browser.">
+    <title>STEP to STL Converter</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -21,7 +16,6 @@
             justify-content: center;
             padding: 20px;
         }
-
         .container {
             background: white;
             border-radius: 20px;
@@ -30,21 +24,18 @@
             width: 100%;
             padding: 40px;
         }
-
         h1 {
             color: #333;
             margin-bottom: 10px;
             font-size: 28px;
             text-align: center;
         }
-
         .subtitle {
             color: #666;
             text-align: center;
             margin-bottom: 30px;
             font-size: 14px;
         }
-
         .upload-area {
             border: 3px dashed #667eea;
             border-radius: 15px;
@@ -54,46 +45,30 @@
             transition: all 0.3s ease;
             background: #f8f9ff;
         }
-
         .upload-area:hover {
             border-color: #764ba2;
             background: #f0f2ff;
         }
-
         .upload-area.dragover {
             border-color: #764ba2;
             background: #e8ebff;
             transform: scale(1.02);
         }
-
-        .upload-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
+        .upload-icon { font-size: 48px; margin-bottom: 15px; }
         .upload-text {
             color: #667eea;
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 8px;
         }
-
-        .upload-hint {
-            color: #999;
-            font-size: 14px;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
+        .upload-hint { color: #999; font-size: 14px; }
+        input[type="file"] { display: none; }
         .quality-selector {
             margin: 25px 0;
             padding: 20px;
             background: #f8f9ff;
             border-radius: 10px;
         }
-
         .quality-selector label {
             display: block;
             margin-bottom: 10px;
@@ -101,22 +76,16 @@
             font-weight: 600;
             font-size: 14px;
         }
-
         .quality-options {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-
         .quality-option {
             flex: 1;
             min-width: 120px;
         }
-
-        .quality-option input[type="radio"] {
-            display: none;
-        }
-
+        .quality-option input[type="radio"] { display: none; }
         .quality-option label {
             display: block;
             padding: 12px 20px;
@@ -129,59 +98,31 @@
             font-weight: 500;
             font-size: 13px;
         }
-
         .quality-option input[type="radio"]:checked + label {
             background: #667eea;
             color: white;
             border-color: #667eea;
         }
-
-        .quality-option label:hover {
-            border-color: #667eea;
-        }
-
+        .quality-option label:hover { border-color: #667eea; }
         .quality-description {
             font-size: 11px;
             color: #666;
             margin-top: 4px;
             font-weight: 400;
         }
-
         .quality-option input[type="radio"]:checked + label .quality-description {
             color: rgba(255, 255, 255, 0.9);
         }
-
         .status {
             margin-top: 25px;
             padding: 15px;
             border-radius: 10px;
             display: none;
         }
-
-        .status.info {
-            background: #e3f2fd;
-            color: #1976d2;
-            display: block;
-        }
-
-        .status.success {
-            background: #e8f5e9;
-            color: #388e3c;
-            display: block;
-        }
-
-        .status.error {
-            background: #ffebee;
-            color: #d32f2f;
-            display: block;
-        }
-
-        .status.loading {
-            background: #fff3e0;
-            color: #f57c00;
-            display: block;
-        }
-
+        .status.info { background: #e3f2fd; color: #1976d2; display: block; }
+        .status.success { background: #e8f5e9; color: #388e3c; display: block; }
+        .status.error { background: #ffebee; color: #d32f2f; display: block; }
+        .status.loading { background: #fff3e0; color: #f57c00; display: block; }
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -191,11 +132,7 @@
             margin-top: 15px;
             display: none;
         }
-
-        .progress-bar.active {
-            display: block;
-        }
-
+        .progress-bar.active { display: block; }
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
@@ -203,7 +140,6 @@
             transition: width 0.3s ease;
             border-radius: 10px;
         }
-
         .download-btn {
             display: none;
             margin-top: 20px;
@@ -218,16 +154,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .download-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-
-        .download-btn.active {
-            display: block;
-        }
-
+        .download-btn.active { display: block; }
         .spinner {
             display: inline-block;
             width: 14px;
@@ -239,11 +170,7 @@
             margin-right: 8px;
             vertical-align: middle;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { to { transform: rotate(360deg); } }
         .file-info {
             margin-top: 15px;
             padding: 15px;
@@ -251,68 +178,39 @@
             border-radius: 8px;
             display: none;
         }
-
-        .file-info.active {
-            display: block;
-        }
-
+        .file-info.active { display: block; }
         .file-info-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
             font-size: 14px;
         }
-
-        .file-info-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .file-info-label {
-            color: #666;
-            font-weight: 500;
-        }
-
-        .file-info-value {
-            color: #333;
-            font-weight: 600;
-        }
-
+        .file-info-item:last-child { margin-bottom: 0; }
+        .file-info-label { color: #666; font-weight: 500; }
+        .file-info-value { color: #333; font-weight: 600; }
         .loading-text {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
         .footer {
             margin-top: 30px;
             text-align: center;
             color: #999;
             font-size: 12px;
         }
-
         @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .quality-options {
-                flex-direction: column;
-            }
-
-            .quality-option {
-                min-width: 100%;
-            }
+            .container { padding: 30px 20px; }
+            h1 { font-size: 24px; }
+            .quality-options { flex-direction: column; }
+            .quality-option { min-width: 100%; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>STEP to STL Converter</h1>
-        <p class="subtitle">Convert your STEP files to STL format directly in your browser - Free & Private</p>
+        <p class="subtitle">Convert STEP files to STL format in your browser</p>
 
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📁</div>
@@ -326,49 +224,33 @@
             <div class="quality-options">
                 <div class="quality-option">
                     <input type="radio" name="quality" id="quality-low" value="0.5" data-max-size="50">
-                    <label for="quality-low">
-                        Low
-                        <div class="quality-description">Max 50 MB</div>
-                    </label>
+                    <label for="quality-low">Low<div class="quality-description">Max 50 MB</div></label>
                 </div>
                 <div class="quality-option">
                     <input type="radio" name="quality" id="quality-medium" value="0.1" data-max-size="20" checked>
-                    <label for="quality-medium">
-                        Medium
-                        <div class="quality-description">Max 20 MB</div>
-                    </label>
+                    <label for="quality-medium">Medium<div class="quality-description">Max 20 MB</div></label>
                 </div>
                 <div class="quality-option">
                     <input type="radio" name="quality" id="quality-high" value="0.01" data-max-size="10">
-                    <label for="quality-high">
-                        High
-                        <div class="quality-description">Max 10 MB</div>
-                    </label>
+                    <label for="quality-high">High<div class="quality-description">Max 10 MB</div></label>
                 </div>
             </div>
         </div>
 
         <div class="file-info" id="fileInfo"></div>
-
         <div class="status" id="status"></div>
-
         <div class="progress-bar" id="progressBar">
             <div class="progress-fill" id="progressFill"></div>
         </div>
-
         <button class="download-btn" id="downloadBtn">Download STL File</button>
-
-        <div class="footer">
-            🔒 All conversions happen locally in your browser. Your files never leave your device.
-        </div>
+        <div class="footer">🔒 Files processed locally in your browser</div>
     </div>
 
     <script>
-    var StepConverter = (function() {
+    (function() {
         var oc = null;
         var stlBlob = null;
         var originalFilename = '';
-
         var uploadArea = document.getElementById('uploadArea');
         var fileInput = document.getElementById('fileInput');
         var status = document.getElementById('status');
@@ -379,12 +261,7 @@
 
         function updateStatus(type, message) {
             status.className = 'status ' + type;
-            
-            if (type === 'loading') {
-                status.innerHTML = '<div class="loading-text"><span class="spinner"></span>' + message + '</div>';
-            } else {
-                status.innerHTML = message;
-            }
+            status.innerHTML = type === 'loading' ? '<div class="loading-text"><span class="spinner"></span>' + message + '</div>' : message;
         }
 
         function setProgress(percent) {
@@ -398,103 +275,70 @@
         }
 
         function displayFileInfo(file) {
-            var sizeKB = (file.size / 1024).toFixed(2);
             var sizeMB = (file.size / 1024 / 1024).toFixed(2);
+            var sizeKB = (file.size / 1024).toFixed(2);
             var displaySize = file.size > 1024 * 1024 ? sizeMB + ' MB' : sizeKB + ' KB';
-
-            fileInfo.innerHTML = 
-                '<div class="file-info-item">' +
-                    '<span class="file-info-label">File name:</span>' +
-                    '<span class="file-info-value">' + file.name + '</span>' +
-                '</div>' +
-                '<div class="file-info-item">' +
-                    '<span class="file-info-label">File size:</span>' +
-                    '<span class="file-info-value">' + displaySize + '</span>' +
-                '</div>';
+            fileInfo.innerHTML = '<div class="file-info-item"><span class="file-info-label">File:</span><span class="file-info-value">' + file.name + '</span></div><div class="file-info-item"><span class="file-info-label">Size:</span><span class="file-info-value">' + displaySize + '</span></div>';
             fileInfo.classList.add('active');
         }
 
         function handleFile(file) {
             if (!oc) {
-                updateStatus('error', 'Converter not ready yet. Please wait...');
+                updateStatus('error', 'Converter not ready. Please wait...');
                 return;
             }
-
-            var validExtensions = ['.step', '.stp'];
             var fileName = file.name.toLowerCase();
             var fileExtension = fileName.substring(fileName.lastIndexOf('.'));
-            
-            if (validExtensions.indexOf(fileExtension) === -1) {
-                updateStatus('error', 'Invalid file type. Please upload a .step or .stp file.');
+            if (['.step', '.stp'].indexOf(fileExtension) === -1) {
+                updateStatus('error', 'Invalid file type. Upload .step or .stp files only.');
                 return;
             }
-
             var selectedQuality = document.querySelector('input[name="quality"]:checked');
             var maxSizeMB = parseInt(selectedQuality.getAttribute('data-max-size'));
             var fileSizeMB = file.size / 1024 / 1024;
-
             if (fileSizeMB > maxSizeMB) {
-                updateStatus('error', 'File too large for selected quality. Maximum ' + maxSizeMB + ' MB allowed. Your file is ' + fileSizeMB.toFixed(2) + ' MB. Please select a lower quality setting or use a smaller file.');
+                updateStatus('error', 'File too large (' + fileSizeMB.toFixed(2) + ' MB). Max ' + maxSizeMB + ' MB for selected quality.');
                 return;
             }
-
             originalFilename = file.name;
             displayFileInfo(file);
             downloadBtn.classList.remove('active');
             stlBlob = null;
-
             var reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     updateStatus('loading', 'Reading file...');
                     setProgress(10);
-
-                    var arrayBuffer = e.target.result;
-                    var uint8Array = new Uint8Array(arrayBuffer);
+                    var uint8Array = new Uint8Array(e.target.result);
                     var filename = 'input.step';
                     oc.FS.writeFile(filename, uint8Array);
-                    
                     setProgress(30);
                     updateStatus('loading', 'Parsing STEP file...');
-
-                    var reader = new oc.STEPControl_Reader();
-                    var readStatus = reader.ReadFile(filename);
-                    
-                    if (readStatus !== 1) {
-                        throw new Error('Failed to read STEP file. The file may be corrupted or in an unsupported format.');
+                    var stepReader = new oc.STEPControl_Reader();
+                    if (stepReader.ReadFile(filename) !== 1) {
+                        throw new Error('Failed to read STEP file');
                     }
-
                     setProgress(50);
                     updateStatus('loading', 'Converting geometry...');
-
-                    reader.TransferRoots();
-                    var shape = reader.OneShape();
-
+                    stepReader.TransferRoots();
+                    var shape = stepReader.OneShape();
                     setProgress(70);
                     updateStatus('loading', 'Generating mesh...');
-
                     var quality = parseFloat(selectedQuality.value);
                     new oc.BRepMesh_IncrementalMesh(shape, quality, false, 0.5, false);
-
                     setProgress(85);
                     updateStatus('loading', 'Exporting to STL...');
-
                     var stlWriter = new oc.StlAPI_Writer();
                     var outputFilename = 'output.stl';
                     stlWriter.Write(shape, outputFilename);
-
                     var stlData = oc.FS.readFile(outputFilename);
                     stlBlob = new Blob([stlData], { type: 'model/stl' });
-
                     oc.FS.unlink(filename);
                     oc.FS.unlink(outputFilename);
-
                     setProgress(100);
-                    updateStatus('success', '✓ Conversion successful! Your STL file is ready.');
+                    updateStatus('success', '✓ Conversion successful!');
                     downloadBtn.classList.add('active');
-
                     setTimeout(hideProgress, 500);
-
                 } catch (error) {
                     console.error('Conversion error:', error);
                     updateStatus('error', 'Conversion failed: ' + error.message);
@@ -504,32 +348,24 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // Event listeners
-        uploadArea.addEventListener('click', function() {
-            fileInput.click();
-        });
-
+        uploadArea.addEventListener('click', function() { fileInput.click(); });
         fileInput.addEventListener('change', function(e) {
             var file = e.target.files[0];
             if (file) handleFile(file);
         });
-
         uploadArea.addEventListener('dragover', function(e) {
             e.preventDefault();
             uploadArea.classList.add('dragover');
         });
-
         uploadArea.addEventListener('dragleave', function() {
             uploadArea.classList.remove('dragover');
         });
-
         uploadArea.addEventListener('drop', function(e) {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             var file = e.dataTransfer.files[0];
             if (file) handleFile(file);
         });
-
         downloadBtn.addEventListener('click', function() {
             if (stlBlob) {
                 var url = URL.createObjectURL(stlBlob);
@@ -543,50 +379,44 @@
             }
         });
 
-        // Load and initialize OpenCascade from self-hosted files
         function init() {
-            updateStatus('loading', 'Loading converter library...');
+            updateStatus('loading', 'Loading library...');
             setProgress(10);
-
             var script = document.createElement('script');
-            script.src = '/lib/opencascade.wasm.js';  // Self-hosted!
-            
+            script.src = '/lib/opencascade.wasm.js';
             script.onload = function() {
                 setProgress(30);
-                updateStatus('loading', 'Initializing CAD engine... This may take a moment.');
-                
+                updateStatus('loading', 'Initializing CAD engine (downloading ~66MB)...');
+                var attempts = 0;
                 var checkInterval = setInterval(function() {
+                    attempts++;
                     if (typeof opencascade !== 'undefined') {
                         clearInterval(checkInterval);
-                        
                         opencascade({
                             locateFile: function(path) {
-                                return '/lib/' + path;  // Self-hosted!
+                                if (path === 'opencascade.wasm.wasm') {
+                                    return 'https://cdn.jsdelivr.net/npm/opencascade.js@1.1.1/dist/opencascade.wasm.wasm';
+                                }
+                                return '/lib/' + path;
                             }
                         }).then(function(ocInstance) {
                             oc = ocInstance;
                             setProgress(100);
-                            updateStatus('info', 'Ready! Upload a STEP file to get started.');
+                            updateStatus('info', 'Ready! Upload a STEP file to convert.');
                             setTimeout(hideProgress, 500);
                         }).catch(function(error) {
                             console.error('Init error:', error);
-                            updateStatus('error', 'Failed to initialize: ' + error.message);
+                            updateStatus('error', 'Initialization failed: ' + error.message);
                         });
+                    } else if (attempts > 100) {
+                        clearInterval(checkInterval);
+                        updateStatus('error', 'Failed to load. Please refresh the page.');
                     }
                 }, 100);
-                
-                setTimeout(function() {
-                    if (!oc) {
-                        clearInterval(checkInterval);
-                        updateStatus('error', 'Failed to load converter. Please refresh the page.');
-                    }
-                }, 10000);
             };
-            
             script.onerror = function() {
-                updateStatus('error', 'Failed to load converter library. Make sure library files are in /lib/ folder.');
+                updateStatus('error', 'Failed to load library. Check that /lib/opencascade.wasm.js exists.');
             };
-            
             document.head.appendChild(script);
         }
 
@@ -595,10 +425,6 @@
         } else {
             init();
         }
-
-        return {
-            init: init
-        };
     })();
     </script>
 </body>
