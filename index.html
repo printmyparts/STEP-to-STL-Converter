@@ -290,15 +290,6 @@
             font-size: 12px;
         }
 
-        .footer a {
-            color: #667eea;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
         @media (max-width: 600px) {
             .container {
                 padding: 30px 20px;
@@ -372,212 +363,19 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/opencascade.js@1.1.1/dist/opencascade.wasm.js"></script>
     <script>
-    (function() {
-        let oc = null;
-        let stlBlob = null;
-        let originalFilename = '';
+    var StepConverter = (function() {
+        var oc = null;
+        var stlBlob = null;
+        var originalFilename = '';
 
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const status = document.getElementById('status');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const fileInfo = document.getElementById('fileInfo');
-
-        // Initialize OpenCascade on page load
-        async function initializeConverter() {
-            try {
-                updateStatus('loading', 'Initializing CAD engine... This may take a moment on first load.');
-                setProgress(30);
-                
-                oc = await opencascade({
-                    locateFile(path) {
-                        return 'https://unpkg.com/opencascade.js@1.1.1/dist/' + path;
-                    }
-                });
-                
-                setProgress(100);
-                updateStatus('info', 'Ready! Upload a STEP file to get started.');
-                setTimeout(() => hideProgress(), 500);
-            } catch (error) {
-                console.error('Failed to initialize OpenCascade:', error);
-                updateStatus('error', 'Failed to initialize converter. Please refresh the page.');
-            }
-        }
-
-        // Upload area click
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        // File input change
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                handleFile(file);
-            }
-        });
-
-        // Drag and drop
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file) {
-                handleFile(file);
-            }
-        });
-
-        // Download button
-        downloadBtn.addEventListener('click', () => {
-            if (stlBlob) {
-                const url = URL.createObjectURL(stlBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = originalFilename.replace(/\.(step|stp)$/i, '.stl');
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-        });
-
-        async function handleFile(file) {
-            if (!oc) {
-                updateStatus('error', 'Converter not ready yet. Please wait...');
-                return;
-            }
-
-            const validExtensions = ['.step', '.stp'];
-            const fileExtension = file.name.toLowerCase().match(/\.[^.]+$/)?.[0];
-            
-            if (!validExtensions.includes(fileExtension)) {
-                updateStatus('error', 'Invalid file type. Please upload a .step or .stp file.');
-                return;
-            }
-
-            // Check file size against selected quality limit
-            const selectedQuality = document.querySelector('input[name="quality"]:checked');
-            const maxSizeMB = parseInt(selectedQuality.dataset.maxSize);
-            const fileSizeMB = file.size / 1024 / 1024;
-
-            if (fileSizeMB > maxSizeMB) {
-                updateStatus('error', `File too large for selected quality. Maximum ${maxSizeMB} MB allowed. Your file is ${fileSizeMB.toFixed(2)} MB. Please select a lower quality setting or use a smaller file.`);
-                return;
-            }
-
-            originalFilename = file.name;
-            
-            // Show file info
-            displayFileInfo(file);
-
-            // Reset UI
-            downloadBtn.classList.remove('active');
-            stlBlob = null;
-
-            try {
-                updateStatus('loading', 'Reading file...');
-                setProgress(10);
-
-                // Read file as ArrayBuffer
-                const arrayBuffer = await file.arrayBuffer();
-                const uint8Array = new Uint8Array(arrayBuffer);
-
-                // Write to virtual filesystem
-                const filename = 'input.step';
-                oc.FS.writeFile(filename, uint8Array);
-                
-                setProgress(30);
-                updateStatus('loading', 'Parsing STEP file...');
-
-                // Read STEP file
-                const reader = new oc.STEPControl_Reader();
-                const readStatus = reader.ReadFile(filename);
-                
-                if (readStatus !== 1) {
-                    throw new Error('Failed to read STEP file. The file may be corrupted or in an unsupported format.');
-                }
-
-                setProgress(50);
-                updateStatus('loading', 'Converting geometry...');
-
-                // Transfer shapes
-                reader.TransferRoots();
-                const shape = reader.OneShape();
-
-                setProgress(70);
-                updateStatus('loading', 'Generating mesh...');
-
-                // Get quality setting
-                const quality = parseFloat(selectedQuality.value);
-
-                // Mesh the shape
-                new oc.BRepMesh_IncrementalMesh(
-                    shape,
-                    quality,
-                    false,
-                    0.5,
-                    false
-                );
-
-                setProgress(85);
-                updateStatus('loading', 'Exporting to STL...');
-
-                // Write STL file
-                const stlWriter = new oc.StlAPI_Writer();
-                const outputFilename = 'output.stl';
-                stlWriter.Write(shape, outputFilename);
-
-                // Read the STL file from virtual filesystem
-                const stlData = oc.FS.readFile(outputFilename);
-                stlBlob = new Blob([stlData], { type: 'model/stl' });
-
-                // Cleanup virtual filesystem
-                oc.FS.unlink(filename);
-                oc.FS.unlink(outputFilename);
-
-                setProgress(100);
-                updateStatus('success', '✓ Conversion successful! Your STL file is ready.');
-                downloadBtn.classList.add('active');
-
-                setTimeout(() => hideProgress(), 500);
-
-            } catch (error) {
-                console.error('Conversion error:', error);
-                updateStatus('error', `Conversion failed: ${error.message}`);
-                hideProgress();
-            }
-        }
-
-        function displayFileInfo(file) {
-            const sizeKB = (file.size / 1024).toFixed(2);
-            const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-            const displaySize = file.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
-
-            fileInfo.innerHTML = `
-                <div class="file-info-item">
-                    <span class="file-info-label">File name:</span>
-                    <span class="file-info-value">${file.name}</span>
-                </div>
-                <div class="file-info-item">
-                    <span class="file-info-label">File size:</span>
-                    <span class="file-info-value">${displaySize}</span>
-                </div>
-            `;
-            fileInfo.classList.add('active');
-        }
+        var uploadArea = document.getElementById('uploadArea');
+        var fileInput = document.getElementById('fileInput');
+        var status = document.getElementById('status');
+        var progressBar = document.getElementById('progressBar');
+        var progressFill = document.getElementById('progressFill');
+        var downloadBtn = document.getElementById('downloadBtn');
+        var fileInfo = document.getElementById('fileInfo');
 
         function updateStatus(type, message) {
             status.className = 'status ' + type;
@@ -599,12 +397,211 @@
             progressFill.style.width = '0%';
         }
 
-        // Initialize on load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeConverter);
-        } else {
-            initializeConverter();
+        function displayFileInfo(file) {
+            var sizeKB = (file.size / 1024).toFixed(2);
+            var sizeMB = (file.size / 1024 / 1024).toFixed(2);
+            var displaySize = file.size > 1024 * 1024 ? sizeMB + ' MB' : sizeKB + ' KB';
+
+            fileInfo.innerHTML = 
+                '<div class="file-info-item">' +
+                    '<span class="file-info-label">File name:</span>' +
+                    '<span class="file-info-value">' + file.name + '</span>' +
+                '</div>' +
+                '<div class="file-info-item">' +
+                    '<span class="file-info-label">File size:</span>' +
+                    '<span class="file-info-value">' + displaySize + '</span>' +
+                '</div>';
+            fileInfo.classList.add('active');
         }
+
+        function handleFile(file) {
+            if (!oc) {
+                updateStatus('error', 'Converter not ready yet. Please wait...');
+                return;
+            }
+
+            var validExtensions = ['.step', '.stp'];
+            var fileName = file.name.toLowerCase();
+            var fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+            
+            if (validExtensions.indexOf(fileExtension) === -1) {
+                updateStatus('error', 'Invalid file type. Please upload a .step or .stp file.');
+                return;
+            }
+
+            var selectedQuality = document.querySelector('input[name="quality"]:checked');
+            var maxSizeMB = parseInt(selectedQuality.getAttribute('data-max-size'));
+            var fileSizeMB = file.size / 1024 / 1024;
+
+            if (fileSizeMB > maxSizeMB) {
+                updateStatus('error', 'File too large for selected quality. Maximum ' + maxSizeMB + ' MB allowed. Your file is ' + fileSizeMB.toFixed(2) + ' MB. Please select a lower quality setting or use a smaller file.');
+                return;
+            }
+
+            originalFilename = file.name;
+            displayFileInfo(file);
+            downloadBtn.classList.remove('active');
+            stlBlob = null;
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    updateStatus('loading', 'Reading file...');
+                    setProgress(10);
+
+                    var arrayBuffer = e.target.result;
+                    var uint8Array = new Uint8Array(arrayBuffer);
+                    var filename = 'input.step';
+                    oc.FS.writeFile(filename, uint8Array);
+                    
+                    setProgress(30);
+                    updateStatus('loading', 'Parsing STEP file...');
+
+                    var reader = new oc.STEPControl_Reader();
+                    var readStatus = reader.ReadFile(filename);
+                    
+                    if (readStatus !== 1) {
+                        throw new Error('Failed to read STEP file. The file may be corrupted or in an unsupported format.');
+                    }
+
+                    setProgress(50);
+                    updateStatus('loading', 'Converting geometry...');
+
+                    reader.TransferRoots();
+                    var shape = reader.OneShape();
+
+                    setProgress(70);
+                    updateStatus('loading', 'Generating mesh...');
+
+                    var quality = parseFloat(selectedQuality.value);
+                    new oc.BRepMesh_IncrementalMesh(shape, quality, false, 0.5, false);
+
+                    setProgress(85);
+                    updateStatus('loading', 'Exporting to STL...');
+
+                    var stlWriter = new oc.StlAPI_Writer();
+                    var outputFilename = 'output.stl';
+                    stlWriter.Write(shape, outputFilename);
+
+                    var stlData = oc.FS.readFile(outputFilename);
+                    stlBlob = new Blob([stlData], { type: 'model/stl' });
+
+                    oc.FS.unlink(filename);
+                    oc.FS.unlink(outputFilename);
+
+                    setProgress(100);
+                    updateStatus('success', '✓ Conversion successful! Your STL file is ready.');
+                    downloadBtn.classList.add('active');
+
+                    setTimeout(hideProgress, 500);
+
+                } catch (error) {
+                    console.error('Conversion error:', error);
+                    updateStatus('error', 'Conversion failed: ' + error.message);
+                    hideProgress();
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Event listeners
+        uploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function() {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            var file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        });
+
+        downloadBtn.addEventListener('click', function() {
+            if (stlBlob) {
+                var url = URL.createObjectURL(stlBlob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = originalFilename.replace(/\.(step|stp)$/i, '.stl');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        });
+
+        // Load and initialize OpenCascade
+        function init() {
+            updateStatus('loading', 'Loading converter library...');
+            setProgress(10);
+
+            var script = document.createElement('script');
+            script.src = 'https://unpkg.com/opencascade.js@1.1.1/dist/opencascade.wasm.js';
+            
+            script.onload = function() {
+                setProgress(30);
+                updateStatus('loading', 'Initializing CAD engine... This may take a moment.');
+                
+                // Wait for opencascade to be available
+                var checkInterval = setInterval(function() {
+                    if (typeof opencascade !== 'undefined') {
+                        clearInterval(checkInterval);
+                        
+                        opencascade({
+                            locateFile: function(path) {
+                                return 'https://unpkg.com/opencascade.js@1.1.1/dist/' + path;
+                            }
+                        }).then(function(ocInstance) {
+                            oc = ocInstance;
+                            setProgress(100);
+                            updateStatus('info', 'Ready! Upload a STEP file to get started.');
+                            setTimeout(hideProgress, 500);
+                        }).catch(function(error) {
+                            console.error('Init error:', error);
+                            updateStatus('error', 'Failed to initialize: ' + error.message);
+                        });
+                    }
+                }, 100);
+                
+                // Timeout after 10 seconds
+                setTimeout(function() {
+                    if (!oc) {
+                        clearInterval(checkInterval);
+                        updateStatus('error', 'Failed to load converter. Please refresh the page.');
+                    }
+                }, 10000);
+            };
+            
+            script.onerror = function() {
+                updateStatus('error', 'Failed to load converter library. Please check your internet connection and refresh.');
+            };
+            
+            document.head.appendChild(script);
+        }
+
+        // Auto-initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        return {
+            init: init
+        };
     })();
     </script>
 </body>
